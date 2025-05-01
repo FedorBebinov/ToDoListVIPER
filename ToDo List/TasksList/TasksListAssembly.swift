@@ -1,10 +1,3 @@
-//
-//  TasksListAssembly.swift
-//  ToDo List
-//
-//  Created by Fedor Bebinov on 18.03.2025.
-//
-
 import UIKit
 
 class TasksListAssembly {

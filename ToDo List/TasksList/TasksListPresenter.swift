@@ -11,9 +11,20 @@ protocol TasksListPresenterProtocol {
     func searchTasks(with searchText: String)
     func indexForTask(_ task: Task) -> Int?
     func toggleVoiceRecognition()
+    func updateTask(_ task: Task)
 }
 
 class TasksListPresenter: TasksListPresenterProtocol {
+    func updateTask(_ task: Task) {
+        if let index = allTasks.firstIndex(where: { $0.id == task.id }) {
+                allTasks[index] = task
+            }
+            if let fIndex = filteredTasks.firstIndex(where: { $0.id == task.id }) {
+                filteredTasks[fIndex] = task
+            }
+            view?.reloadData()
+    }
+    
     weak var view: TasksListViewControllerProtocol?
     private let router: TasksListRouterProtocol
     private let interactor: TasksListInteractorProtocol

@@ -1,10 +1,3 @@
-//
-//  TasksListRouter.swift
-//  ToDo List
-//
-//  Created by Fedor Bebinov on 18.03.2025.
-//
-
 import UIKit
 
 protocol TasksListRouterProtocol {
@@ -13,9 +6,10 @@ protocol TasksListRouterProtocol {
 
 class TasksListRouter: TasksListRouterProtocol {
     weak var viewController: UIViewController?
-
-        func navigateToTaskDetails(with task: Task) {
-            //let taskDetailsVC = TaskDetailsViewController(task: task) // Экран с информацией о задаче
-            //viewController?.navigationController?.pushViewController(taskDetailsVC, animated: true)
-        }
+    
+    func navigateToTaskDetails(with task: Task) {
+        guard let delegate = viewController as? TaskDetailsViewControllerDelegate else { return }
+        let taskDetailsVC = TaskDetailsViewController(task: task, delegate: delegate)
+        viewController?.navigationController?.pushViewController(taskDetailsVC, animated: true)
+    }
 }

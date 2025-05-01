@@ -1,10 +1,3 @@
-//
-//  ViewController.swift
-//  ToDo List
-//
-//  Created by Fedor Bebinov on 17.03.2025.
-//
-
 import UIKit
 
 protocol TasksListViewControllerProtocol: AnyObject{
@@ -20,7 +13,7 @@ protocol TasksListViewControllerProtocol: AnyObject{
 class TasksListViewController: UIViewController, TasksListViewControllerProtocol {
     
     private let presenter: TasksListPresenterProtocol
-    
+        
     private lazy var activityIndicator: UIActivityIndicatorView = {
         activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.color = .gray
@@ -302,5 +295,11 @@ extension TasksListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+    }
+}
+
+extension TasksListViewController: TaskDetailsViewControllerDelegate {
+    func didUpdateTask(_ task: Task) {
+        presenter.updateTask(task) // Реализуйте этот метод у presenter
     }
 }
