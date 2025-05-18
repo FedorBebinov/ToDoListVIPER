@@ -46,7 +46,7 @@ class TasksListInteractor: TasksListInteractorProtocol {
             completion(tasks)
         }
     }
-
+    
     func addTask(_ task: Task, completion: @escaping ([Task]) -> Void) {
         storageService.addTask(task)
         let tasks = storageService.fetchTasks()

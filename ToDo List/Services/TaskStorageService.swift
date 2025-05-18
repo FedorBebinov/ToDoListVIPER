@@ -3,7 +3,7 @@ import CoreData
 
 final class TaskStorageService {
     static let shared = TaskStorageService()
-
+    
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "ToDo_List")
         container.loadPersistentStores { _, error in
@@ -12,9 +12,9 @@ final class TaskStorageService {
         return container
     }()
     var context: NSManagedObjectContext { persistentContainer.viewContext }
-
+    
     private init() {}
-
+    
     func fetchTasks(search: String? = nil) -> [Task] {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
         if let search = search, !search.isEmpty {
@@ -29,7 +29,7 @@ final class TaskStorageService {
             return []
         }
     }
-
+    
     func addTask(_ task: Task) {
         let entity = TaskEntity(context: context)
         entity.id = Int64(task.id)
@@ -40,7 +40,7 @@ final class TaskStorageService {
         entity.taskDescription = task.description
         saveContext()
     }
-
+    
     func updateTask(_ task: Task) {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", task.id)
@@ -55,7 +55,7 @@ final class TaskStorageService {
             }
         } catch { print("Update error: \(error)") }
     }
-
+    
     func deleteTask(id: Int) {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", id)
@@ -66,14 +66,14 @@ final class TaskStorageService {
             }
         } catch { print("Delete error: \(error)") }
     }
-
+    
     func saveContext() {
         if context.hasChanges {
             do { try context.save() }
             catch { print("Save error: \(error)") }
         }
     }
-
+    
     func generateNewId() -> Int {
         let tasks = fetchTasks()
         return (tasks.map { $0.id }.max() ?? 0) + 1

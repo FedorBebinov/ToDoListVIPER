@@ -1,0 +1,44 @@
+{
+  "configurations" : [
+    {
+      "id" : "C66382ED-B9CA-4B8B-9183-0964DF82AFF9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "CG_NUMERICS_SHOW_BACKTRACE",
+        "value" : "1"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:ToDo List.xcodeproj",
+      "identifier" : "854228EF2D886E1F00965106",
+      "name" : "ToDo List"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:ToDo List.xcodeproj",
+        "identifier" : "854229082D886E2100965106",
+        "name" : "ToDo ListTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:ToDo List.xcodeproj",
+        "identifier" : "854229122D886E2200965106",
+        "name" : "ToDo ListUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

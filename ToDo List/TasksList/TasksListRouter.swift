@@ -6,7 +6,7 @@ protocol TasksListRouterProtocol: AnyObject {
 
 final class TasksListRouter: TasksListRouterProtocol {
     weak var viewController: UIViewController?
-
+    
     func navigateToTaskDetails(with task: Task, delegate: TaskDetailsViewControllerDelegate?) {
         let detailVC = TaskDetailsViewController()
         let interactor = TaskDetailsInteractor(task: task)

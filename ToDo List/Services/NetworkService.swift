@@ -6,7 +6,7 @@ protocol NetworkServiceProtocol {
 
 class NetworkService: NetworkServiceProtocol {
     
-    private let apiURL = URL(string: "https://drive.google.com/uc?id=1MXypRbK2CS9fqPhTtPonn580h1sHUs2W&export=download")! 
+    private let apiURL = URL(string: "https://drive.google.com/uc?id=1MXypRbK2CS9fqPhTtPonn580h1sHUs2W&export=download")!
     
     func fetchTasks(completion: @escaping (Result<[Task], Error>) -> Void) {
         let request = URLRequest(url: apiURL)
@@ -47,7 +47,7 @@ class NetworkService: NetworkServiceProtocol {
         if let stringData = String(data: jsonData, encoding: .utf8) {
             print("Raw JSON data: \(stringData)")
         }
-
+        
         let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
         guard let todosArray = jsonObject?["todos"] else {
             throw NSError(domain: "Invalid JSON structure", code: -1, userInfo: [NSLocalizedDescriptionKey: "Не найден ключ 'todos'"])

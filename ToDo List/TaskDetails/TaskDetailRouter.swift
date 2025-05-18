@@ -7,11 +7,11 @@ protocol TaskDetailsRouterProtocol: AnyObject {
 
 final class TaskDetailsRouter: TaskDetailsRouterProtocol {
     weak var viewController: UIViewController?
-
+    
     init(viewController: UIViewController?) {
         self.viewController = viewController
     }
-
+    
     func closeDetails() {
         viewController?.navigationController?.popViewController(animated: true)
     }
@@ -26,7 +26,7 @@ final class TaskDetailsRouter: TaskDetailsRouterProtocol {
             task: task
         )
         detailVC.presenter = presenter
-        detailVC.delegate = delegate 
+        detailVC.delegate = delegate
         interactor.output = presenter
         viewController?.navigationController?.pushViewController(detailVC, animated: true)
     }

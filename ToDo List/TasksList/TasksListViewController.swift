@@ -17,7 +17,7 @@ protocol TaskDetailsViewControllerDelegate: AnyObject {
 class TasksListViewController: UIViewController, TasksListViewControllerProtocol {
     
     private let presenter: TasksListPresenterProtocol
-        
+    
     private lazy var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = .gray
@@ -54,7 +54,7 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
                 string: placeholderText,
                 attributes: [.foregroundColor: UIColor.lightGray]
             )
-
+            
             if let leftView = searchTextField.leftView as? UIImageView {
                 leftView.image = leftView.image?.withRenderingMode(.alwaysTemplate)
                 leftView.tintColor = .lightGray
@@ -168,7 +168,7 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchBar.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 10),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                        
+            
             tasksTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
             tasksTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tasksTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -234,13 +234,13 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
     
     @objc private func didTapAddTaskButton() {
         let newTask = Task(
-               id: TaskStorageService.shared.generateNewId(),
-               todo: "Новое дело",
-               completed: false,
-               userId: 0,
-               date: Date(),
-               description: "Описание"
-           )
+            id: TaskStorageService.shared.generateNewId(),
+            todo: "Новое дело",
+            completed: false,
+            userId: 0,
+            date: Date(),
+            description: "Описание"
+        )
         presenter.addTask(newTask)
     }
     

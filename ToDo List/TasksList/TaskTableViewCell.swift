@@ -61,13 +61,13 @@ class TaskTableViewCell: UITableViewCell {
     private func setupLayout() {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapChecker))
         checkerImageView.addGestureRecognizer(tapRecognizer)
-        checkerImageView.isUserInteractionEnabled = true 
+        checkerImageView.isUserInteractionEnabled = true
         
         contentView.addSubview(checkerImageView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(descriptionLabel)
         contentView.addSubview(dateLabel)
-
+        
         NSLayoutConstraint.activate([
             checkerImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             checkerImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
@@ -120,12 +120,12 @@ class TaskTableViewCell: UITableViewCell {
         dateLabel.textColor = task.completed ? .gray : .lightGray
         
         if task.completed {
-                checkerImageView.image = UIImage(systemName: "checkmark.circle")
-                checkerImageView.tintColor = .systemYellow
-            } else {
-                checkerImageView.image = UIImage(systemName: "circle")
-                checkerImageView.tintColor = .lightGray
-            }
+            checkerImageView.image = UIImage(systemName: "checkmark.circle")
+            checkerImageView.tintColor = .systemYellow
+        } else {
+            checkerImageView.image = UIImage(systemName: "circle")
+            checkerImageView.tintColor = .lightGray
+        }
     }
     
     @objc private func didTapChecker() {
