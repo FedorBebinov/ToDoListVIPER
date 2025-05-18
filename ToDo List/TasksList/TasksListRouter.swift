@@ -1,15 +1,25 @@
 import UIKit
 
-protocol TasksListRouterProtocol {
-    func navigateToTaskDetails(with task: Task)
+protocol TasksListRouterProtocol: AnyObject {
+    func navigateToTaskDetails(with task: Task, delegate: TaskDetailsViewControllerDelegate?)
 }
 
-class TasksListRouter: TasksListRouterProtocol {
+final class TasksListRouter: TasksListRouterProtocol {
     weak var viewController: UIViewController?
-    
-    func navigateToTaskDetails(with task: Task) {
-        guard let delegate = viewController as? TaskDetailsViewControllerDelegate else { return }
-        let taskDetailsVC = TaskDetailsViewController(task: task, delegate: delegate)
-        viewController?.navigationController?.pushViewController(taskDetailsVC, animated: true)
+
+    func navigateToTaskDetails(with task: Task, delegate: TaskDetailsViewControllerDelegate?) {
+        let detailVC = TaskDetailsViewController()
+        let interactor = TaskDetailsInteractor(task: task)
+        let detailRouter = TaskDetailsRouter(viewController: detailVC)
+        let presenter = TaskDetailsPresenter(
+            view: detailVC,
+            interactor: interactor,
+            router: detailRouter,
+            task: task
+        )
+        detailVC.presenter = presenter
+        detailVC.delegate = delegate
+        interactor.output = presenter
+        viewController?.navigationController?.pushViewController(detailVC, animated: true)
     }
 }

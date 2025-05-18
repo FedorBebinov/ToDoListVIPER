@@ -1,59 +1,67 @@
-import UIKit
+import Foundation
 
 protocol TasksListInteractorProtocol {
-    func fetchTasks(completion: @escaping ([Task]) -> Void)
-    func startSpeechRecognition(completion: @escaping (Result<String, Error>) -> Void)
-    func stopSpeechRecognition()
+    func fetchTasks(search: String?, completion: @escaping ([Task]) -> Void)
+    func addTask(_ task: Task, completion: @escaping ([Task]) -> Void)
+    func updateTask(_ task: Task, completion: @escaping ([Task]) -> Void)
+    func deleteTask(_ task: Task, completion: @escaping ([Task]) -> Void)
 }
 
 class TasksListInteractor: TasksListInteractorProtocol {
-    
-    private let speechService: SpeechRecognitionServiceProtocol
     private let networkService: NetworkServiceProtocol
+    private let storageService = TaskStorageService.shared
     
-    init(speechService: SpeechRecognitionServiceProtocol, networkService: NetworkServiceProtocol) {
-        self.speechService = speechService
+    init(networkService: NetworkServiceProtocol) {
         self.networkService = networkService
     }
     
-    func startSpeechRecognition(completion: @escaping (Result<String, Error>) -> Void) {
-        speechService.startRecognition(completion: completion)
-    }
-    
-    func stopSpeechRecognition() {
-        speechService.stopRecognition()
-    }
-    
-    func fetchTasks(completion: @escaping ([Task]) -> Void) {
-        networkService.fetchTasks { result in
-            switch result {
-            case .success(let tasks):
-                let updatedTasks = self.generateAdditionalData(for: tasks)
-                DispatchQueue.main.async {
-                    completion(updatedTasks)
-                }
-            case .failure(let error):
-                print("Ошибка загрузки задач: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion([]) // Возвращаем пустой массив при ошибке.
+    func fetchTasks(search: String? = nil, completion: @escaping ([Task]) -> Void) {
+        if !UserDefaults.standard.bool(forKey: AppConstants.hasLoadedTasks) {
+            networkService.fetchTasks { [weak self] result in
+                switch result {
+                case .success(let tasks):
+                    let preparedTasks = tasks.map { task in
+                        Task(
+                            id: task.id,
+                            todo: task.todo,
+                            completed: task.completed,
+                            userId: task.userId,
+                            date: task.date,
+                            description: ((task.description ?? "").isEmpty ? "Описание для \"\(task.todo)\"" : task.description)
+                        )
+                    }
+                    for task in preparedTasks {
+                        self?.storageService.addTask(task)
+                    }
+                    UserDefaults.standard.set(true, forKey: AppConstants.hasLoadedTasks)
+                    let fetched = self?.storageService.fetchTasks(search: search) ?? []
+                    DispatchQueue.main.async { completion(fetched) }
+                case .failure(_):
+                    let fetched = self?.storageService.fetchTasks(search: search) ?? []
+                    DispatchQueue.main.async { completion(fetched) }
                 }
             }
+        } else {
+            let tasks = storageService.fetchTasks(search: search)
+            completion(tasks)
         }
     }
+
+    func addTask(_ task: Task, completion: @escaping ([Task]) -> Void) {
+        storageService.addTask(task)
+        let tasks = storageService.fetchTasks()
+        completion(tasks)
+    }
     
-    private func generateAdditionalData(for tasks: [Task]) -> [Task] {
-        return tasks.map { task in
-            let description = "Описание задачи: \(task.todo.lowercased())"
-            let creationDate = Date()
-            
-            return Task(
-                id: task.id,
-                todo: task.todo,
-                completed: task.completed,
-                userId: task.userId,
-                date: creationDate,
-                description: description 
-            )
-        }
+    func updateTask(_ task: Task, completion: @escaping ([Task]) -> Void) {
+        storageService.updateTask(task)
+        let tasks = storageService.fetchTasks()
+        completion(tasks)
+    }
+    
+    func deleteTask(_ task: Task, completion: @escaping ([Task]) -> Void) {
+        storageService.deleteTask(id: task.id)
+        let tasks = storageService.fetchTasks()
+        completion(tasks)
     }
 }

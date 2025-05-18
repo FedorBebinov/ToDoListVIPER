@@ -10,16 +10,20 @@ protocol TasksListViewControllerProtocol: AnyObject{
     func displayError(_ message: String)
 }
 
+protocol TaskDetailsViewControllerDelegate: AnyObject {
+    func didUpdateTask(_ task: Task)
+}
+
 class TasksListViewController: UIViewController, TasksListViewControllerProtocol {
     
     private let presenter: TasksListPresenterProtocol
         
     private lazy var activityIndicator: UIActivityIndicatorView = {
-        activityIndicator = UIActivityIndicatorView(style: .large)
-        activityIndicator.color = .gray
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        return activityIndicator
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
     }()
     
     private lazy var header: UILabel = {
@@ -50,7 +54,6 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
                 string: placeholderText,
                 attributes: [.foregroundColor: UIColor.lightGray]
             )
-            
 
             if let leftView = searchTextField.leftView as? UIImageView {
                 leftView.image = leftView.image?.withRenderingMode(.alwaysTemplate)
@@ -66,16 +69,14 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
         return searchBar
     }()
     
-    private lazy var micButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.translatesAutoresizingMaskIntoConstraints = false
+    private lazy var micImageView: UIImageView = {
+        let imageView = UIImageView()
         let micImage = UIImage(systemName: "mic.fill")?.withRenderingMode(.alwaysTemplate)
-        button.setImage(micImage, for: .normal)
-        button.tintColor = .lightGray
-        button.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(didTapMicButton), for: .touchUpInside)
-        
-        return button
+        imageView.image = micImage
+        imageView.tintColor = .lightGray
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
     
     private lazy var tasksTableView: UITableView = {
@@ -87,7 +88,7 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
         tableView.backgroundColor = .black
         tableView.separatorStyle = .singleLine
         tableView.separatorColor = UIColor.lightGray
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20) // Отступы слева и справа
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
         return tableView
     }()
     
@@ -131,6 +132,16 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
         presenter.viewDidLoad()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
     private func setupUI() {
         view.backgroundColor = .black
         view.addSubview(header)
@@ -139,25 +150,25 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
         view.addSubview(footerView)
         footerView.addSubview(countLabel)
         footerView.addSubview(addButton)
-        guard let textField = searchBar.value(forKey: "searchField") as? UITextField else {
-            return
+        if let textField = searchBar.value(forKey: "searchField") as? UITextField {
+            textField.addSubview(micImageView)
+            NSLayoutConstraint.activate([
+                micImageView.trailingAnchor.constraint(equalTo: textField.trailingAnchor, constant: -8),
+                micImageView.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
+                micImageView.widthAnchor.constraint(equalToConstant: 24),
+                micImageView.heightAnchor.constraint(equalToConstant: 24)
+            ])
         }
-        textField.addSubview(micButton)
         view.addSubview(activityIndicator)
         
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             header.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchBar.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 10),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            micButton.trailingAnchor.constraint(equalTo: textField.trailingAnchor, constant: -8),
-            micButton.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
-            micButton.widthAnchor.constraint(equalToConstant: 24),
-            micButton.heightAnchor.constraint(equalToConstant: 24),
-            
+                        
             tasksTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
             tasksTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tasksTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -204,13 +215,11 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
     
     func updateSearchBar(with text: String) {
         searchBar.text = text
-        //let micImageName = presenter.isListening ? "mic.circle.fill" : "mic.fill"
-        //micButton.setImage(UIImage(systemName: micImageName), for: .normal)
     }
     
     func setMicButtonState(isListening: Bool) {
-        let micImageName = isListening ? "mic.circle.fill" : "mic.fill" // Слушает или нет
-        micButton.setImage(UIImage(systemName: micImageName), for: .normal)
+        let micImageName = isListening ? "mic.circle.fill" : "mic.fill"
+        micImageView.image = UIImage(systemName: micImageName)?.withRenderingMode(.alwaysTemplate)
     }
     
     func showError(message: String) {
@@ -219,13 +228,22 @@ class TasksListViewController: UIViewController, TasksListViewControllerProtocol
         present(alert, animated: true, completion: nil)
     }
     
-    @objc private func didTapAddTaskButton() {
-        print("Новая задача создана!")
+    private func openTaskDetail(for task: Task) {
+        presenter.didSelectTask(task: task)
     }
     
-    @objc private func didTapMicButton() {
-        presenter.toggleVoiceRecognition()
+    @objc private func didTapAddTaskButton() {
+        let newTask = Task(
+               id: TaskStorageService.shared.generateNewId(),
+               todo: "Новое дело",
+               completed: false,
+               userId: 0,
+               date: Date(),
+               description: "Описание"
+           )
+        presenter.addTask(newTask)
     }
+    
 }
 
 extension TasksListViewController: UITableViewDataSource {
@@ -247,43 +265,38 @@ extension TasksListViewController: UITableViewDataSource {
 extension TasksListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         presenter.didSelectTask(at: indexPath.row)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView,
                    contextMenuConfigurationForRowAt indexPath: IndexPath,
                    point: CGPoint) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: nil,
-                                          previewProvider: nil,
-                                          actionProvider: {
-            suggestedActions in
-            let editAction =
-            UIAction(title: NSLocalizedString("Редактировать", comment: ""),
-                     image: UIImage(systemName: "arrow.up.square")) { action in
-                //self.performInspect(indexPath)
+        let task = presenter.task(at: indexPath.row)
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self = self else { return UIMenu(title: "", children: []) }
+            let editAction = UIAction(
+                title: NSLocalizedString("Редактировать", comment: ""),
+                image: UIImage(systemName: "arrow.up.square")
+            ) { _ in self.openTaskDetail(for: task) }
+            let shareAction = UIAction(
+                title: NSLocalizedString("Поделиться", comment: ""),
+                image: UIImage(systemName: "plus.square.on.square")
+            ) { _ in
             }
-            let shareAction =
-            UIAction(title: NSLocalizedString("Поделиться", comment: ""),
-                     image: UIImage(systemName: "plus.square.on.square")) { action in
-                //self.performDuplicate(indexPath)
-            }
-            let deleteAction =
-            UIAction(title: NSLocalizedString("Удалить", comment: ""),
-                     image: UIImage(systemName: "trash"),
-                     attributes: .destructive) { action in
-                //self.performDelete(indexPath)
-            }
+            let deleteAction = UIAction(
+                title: NSLocalizedString("Удалить", comment: ""),
+                image: UIImage(systemName: "trash"),
+                attributes: .destructive
+            ) { _ in self.presenter.deleteTask(task) }
             return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
-        })
+        }
     }
-    
 }
 
 extension TasksListViewController: TaskTableViewCellDelegate {
     func didTapChecker(for task: Task) {
         presenter.toggleTaskCompletion(for: task)
-        
         guard let index = presenter.indexForTask(task) else { return }
-        
         tasksTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
     }
 }
@@ -300,6 +313,6 @@ extension TasksListViewController: UISearchBarDelegate {
 
 extension TasksListViewController: TaskDetailsViewControllerDelegate {
     func didUpdateTask(_ task: Task) {
-        presenter.updateTask(task) // Реализуйте этот метод у presenter
+        presenter.updateTask(task)
     }
 }

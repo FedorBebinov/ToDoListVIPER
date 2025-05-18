@@ -61,7 +61,7 @@ class TaskTableViewCell: UITableViewCell {
     private func setupLayout() {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapChecker))
         checkerImageView.addGestureRecognizer(tapRecognizer)
-        checkerImageView.isUserInteractionEnabled = true // Включаем взаимодействие
+        checkerImageView.isUserInteractionEnabled = true 
         
         contentView.addSubview(checkerImageView)
         contentView.addSubview(titleLabel)
